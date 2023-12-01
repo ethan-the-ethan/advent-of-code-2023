@@ -28,37 +28,19 @@ fn parse_part2(line: &str) -> Option<i32> {
     let mut first: HashMap<usize, &str> = HashMap::new();
     let mut last: HashMap<usize, &str> = HashMap::new();
 
-    // Search for all the words, storing index they occur mapped to the value they represent
-    for word in map.keys() {
+    let mut v: Vec<&&str> = map.keys().collect(); 
+    v.extend(map.values());
+
+    // Search for all the words and numerals, storing index they occur mapped to the value they represent
+    for word in v {
         match line.find(word) {
-            Some(index) => {
-                first.insert(index, map.get(word)?);
-            },
-            None => ()
+            Some(index) => first.insert(index, map.get(word).unwrap_or(word)),
+            None => continue
         };
 
         match line.rfind(word) {
-            Some(index) => {
-                last.insert(index, map.get(word)?);
-            },
-            None => ()
-        };
-    }
-
-    // As above for the numerals
-    for num in map.values() {
-        match line.find(num) {
-            Some(index) => {
-                first.insert(index, num);
-            },
-            None => ()
-        };
-
-        match line.rfind(num) {
-            Some(index) => {
-                last.insert(index, num);
-            },
-            None => ()
+            Some(index) => last.insert(index, map.get(word).unwrap_or(word)),
+            None => continue
         };
     }
 
@@ -70,6 +52,23 @@ fn parse_part2(line: &str) -> Option<i32> {
     match format!("{}{}", firstdigit, lastdigit).parse::<i32>() {
         Ok(n) => Some(n),
         Err(_) => None
+    }
+}
+
+// Tests to ensure what I'm changing doesn't make the algorithm wrong
+#[cfg(test)]
+mod tests {
+    use crate::{parse_part1, parse_part2};
+    #[test]
+    fn part1() {
+        assert_eq!(parse_part1("treb7uchet"), 77);
+        assert_eq!(parse_part1("pqr3stu8vwx"), 38);
+    }
+    #[test]
+    fn part2() {
+        assert_eq!(parse_part2("7pqrstsixteen"), Some(76));
+        assert_eq!(parse_part2("1sevenmpbvtgfivefive"), Some(15));
+        assert_eq!(parse_part2("hjafive2klasnine"), Some(59));
     }
 }
 
